@@ -1,0 +1,170 @@
+/* pages/diy/diy.wxss */
+
+/* 1. 整体容器 */
+.diy-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f7f8fa;
+  position: relative; /* 为绝对定位做参照 */
+}
+
+/* 2. 顶部悬浮计价栏 */
+.info-bar {
+  position: absolute;
+  top: 20rpx;
+  left: 20rpx;
+  right: 20rpx;
+  height: 100rpx;
+  background: rgba(255, 255, 255, 0.9); /* 半透明白底 */
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05);
+  z-index: 100;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.label { font-size: 24rpx; color: #999; }
+.value { font-size: 32rpx; font-weight: bold; color: #333; }
+.value.price { color: #d4a373; } 
+
+/* 3. 画布容器 */
+.canvas-wrapper {
+  flex: 1;
+  width: 750rpx;
+  background-color: #f5f5f5;
+  position: relative;
+  overflow: hidden;
+}
+
+.main-canvas {
+  display: block;
+  width: 750rpx;
+  height: 100%;
+}
+
+/* 4. 垃圾桶区域 (包含图标和气泡) */
+.trash-wrapper {
+  position: absolute;
+  bottom: 40rpx;
+  right: 40rpx;
+  width: 100rpx;
+  height: 100rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20; 
+}
+
+/* 垃圾桶图标 */
+.trash-icon {
+  width: 80rpx;
+  height: 80rpx;
+  opacity: 0.6;
+  transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28); /* 弹性动画 */
+}
+
+/* 拖拽激活状态 (变大) */
+.trash-icon.active {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* 5. 提示气泡 (Tooltip) */
+.confirm-bubble {
+  position: absolute;
+  bottom: 110%; /* 浮在垃圾桶上方 */
+  background-color: #ff4d4f; /* 警示红 */
+  color: #fff;
+  font-size: 24rpx;
+  padding: 12rpx 24rpx;
+  border-radius: 30rpx;
+  white-space: nowrap;
+  box-shadow: 0 4rpx 12rpx rgba(255, 77, 79, 0.3);
+  
+  /* 默认隐藏状态 */
+  opacity: 0;
+  transform: translateY(10rpx) scale(0.9);
+  transition: all 0.2s ease;
+  pointer-events: none; /* 气泡本身不挡点击 */
+}
+
+/* 气泡显示状态 */
+.confirm-bubble.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 气泡底部的小三角 */
+.arrow {
+  position: absolute;
+  bottom: -8rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10rpx solid transparent;
+  border-right: 10rpx solid transparent;
+  border-top: 10rpx solid #ff4d4f; 
+}
+
+/* 6. 底部配珠选择面板 */
+.picker-panel {
+  height: 340rpx;
+  background: #fff;
+  border-top-left-radius: 30rpx;
+  border-top-right-radius: 30rpx;
+  box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 50;
+}
+
+.panel-header {
+  padding: 20rpx 30rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
+
+.bead-scroll {
+  flex: 1;
+  display: flex;
+  padding-left: 20rpx;
+  white-space: nowrap;
+}
+
+.bead-item {
+  display: inline-block;
+  width: 140rpx;
+  margin-right: 20rpx;
+  text-align: center;
+}
+
+/* 纯CSS画的圆圈 */
+.bead-circle {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  margin: 0 auto;
+  /* border: 4rpx solid #fff; */ /* 建议去掉白边，立体感更强 */
+  box-shadow: 0 4rpx 8rpx rgba(0,0,0,0.1);
+}
+
+.bead-info {
+  margin-top: 10rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.name { font-size: 24rpx; color: #333; margin-bottom: 4rpx; }
+.price { font-size: 22rpx; color: #d4a373; font-weight: bold; }

@@ -1,0 +1,56 @@
+<view class="diy-container">
+  <view class="info-bar">
+    <view class="info-item">
+      <text class="label">珠子数</text>
+      <text class="value">{{addedBeads.length}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">当前总价</text>
+      <text class="value price">¥{{totalPrice}}</text>
+    </view>
+  </view>
+
+  <view class="canvas-wrapper">
+  <canvas 
+    type="2d" 
+    id="braceletCanvas" 
+    class="main-canvas"
+    catchtouchstart="onTouchStart"
+    catchtouchmove="onTouchMove"
+    catchtouchend="onTouchEnd"
+  ></canvas>
+  <view class="trash-wrapper" bindtap="onTrashTap">
+    <view class="confirm-bubble {{showClearConfirm ? 'show' : ''}}">
+      <text>再次点击清空</text>
+      <view class="arrow"></view> </view>
+      <image 
+      class="trash-icon {{isTrashHover ? 'active' : ''}}" 
+        src="data:image/svg+xml;base64,PHN2ZyB0PSIxNzY0MzI0NjcxNTk5IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjM1OTYiIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48cGF0aCBkPSJNNjg2LjA4IDkyMS42aC0zMjcuNjhDMjY4LjI4OCA5MjEuNiAxODQuMzIgODM3LjYzMiAxODQuMzIgNzQzLjQyNFYzMjcuNjhjMC0yMi41MjggMTguNDMyLTQwLjk2IDQwLjk2LTQwLjk2czQwLjk2IDE4LjQzMiA0MC45NiA0MC45NnY0MTUuNzQ0YzAgNDcuMTA0IDQ3LjEwNCA5Ni4yNTYgOTIuMTYgOTYuMjU2aDMyNy42OGM0NS4wNTYgMCA3MS42OC00OS4xNTIgNzEuNjgtOTYuMjU2VjMyNy42OGMwLTIyLjUyOCAxOC40MzItNDAuOTYgNDAuOTYtNDAuOTZzNDAuOTYgMTguNDMyIDQwLjk2IDQwLjk2djQxNS43NDRjMCA4OC4wNjQtNTcuMzQ0IDE3OC4xNzYtMTUzLjYgMTc4LjE3NnoiIGZpbGw9IiM3MDcwNzAiIHAtaWQ9IjM1OTciPjwvcGF0aD48cGF0aCBkPSJNOTIxLjYgMzQ4LjE2SDEwMi40Yy0yMi41MjggMC00MC45Ni0xOC40MzItNDAuOTYtNDAuOTZzMTguNDMyLTQwLjk2IDQwLjk2LTQwLjk2aDgxOS4yYzIyLjUyOCAwIDQwLjk2IDE4LjQzMiA0MC45NiA0MC45NnMtMTguNDMyIDQwLjk2LTQwLjk2IDQwLjk2ek03NTcuNzYgMTg0LjMySDI2Ni4yNGMtMjIuNTI4IDAtNDAuOTYtMTguNDMyLTQwLjk2LTQwLjk2czE4LjQzMi00MC45NiA0MC45Ni00MC45Nmg0OTEuNTJjMjIuNTI4IDAgNDAuOTYgMTguNDMyIDQwLjk2IDQwLjk2cy0xOC40MzIgNDAuOTYtNDAuOTYgNDAuOTZ6IiBmaWxsPSIjNzA3MDcwIiBwLWlkPSIzNTk4Ij48L3BhdGg+PHBhdGggZD0iTTU5My45MiA3MTYuOGMtMjIuNTI4IDAtNDAuOTYtMTguNDMyLTQwLjk2LTQwLjk2VjQzMC4wOGMwLTIyLjUyOCAxOC40MzItNDAuOTYgNDAuOTYtNDAuOTZzNDAuOTYgMTguNDMyIDQwLjk2IDQwLjk2djI0NS43NmMwIDIyLjUyOC0xOC40MzIgNDAuOTYtNDAuOTYgNDAuOTZ6TTQzMC4wOCA3MTYuOGMtMjIuNTI4IDAtNDAuOTYtMTguNDMyLTQwLjk2LTQwLjk2VjQzMC4wOGMwLTIyLjUyOCAxOC40MzItNDAuOTYgNDAuOTYtNDAuOTZzNDAuOTYgMTguNDMyIDQwLjk2IDQwLjk2djI0NS43NmMwIDIyLjUyOC0xOC40MzIgNDAuOTYtNDAuOTYgNDAuOTZ6IiBmaWxsPSIjNzA3MDcwIiBwLWlkPSIzNTk5Ij48L3BhdGg+PC9zdmc+"
+      />
+  </view>
+</view>
+
+  <view class="picker-panel">
+    <view class="panel-header">
+       <text>选择配珠</text>
+       <text style="font-size: 24rpx; color: #999;">点击添加</text>
+    </view>
+    
+    <scroll-view class="bead-scroll" scroll-x="true" enable-flex="true">
+      <view 
+        class="bead-item" 
+        wx:for="{{beadList}}" 
+        wx:key="id" 
+        bindtap="onSelectBead" 
+        data-item="{{item}}"
+      >
+        <view class="bead-circle" style="background: radial-gradient(circle at 30% 30%, #ffffff, {{item.color}});"></view>
+        
+        <view class="bead-info">
+          <text class="name">{{item.name}}</text>
+          <text class="price">¥{{item.price}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>

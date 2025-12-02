@@ -1,0 +1,19 @@
+/** app.wxss **/
+page {
+  /* 定义主题色：莫兰迪灰/高级白 */
+  --primary-color: #333333;
+  --accent-color: #d4a373; /* 金色点缀 */
+  --bg-color: #f7f8fa;
+  
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+    sans-serif;
+  background-color: var(--bg-color);
+  box-sizing: border-box;
+} 
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
