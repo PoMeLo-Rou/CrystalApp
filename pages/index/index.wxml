@@ -1,2 +1,27 @@
-<!--pages/index/index.wxml-->
-<text>pages/index/index.wxml</text>
+<view class="container">
+  <view class="banner">
+    <view class="banner-text">
+      <text class="title">今日灵感</text>
+      <text class="subtitle">寻找属于你的能量水晶</text>
+    </view>
+    <view class="banner-bg"></view>
+  </view>
+
+  <view class="entry-card" bindtap="goToDIY">
+    <view class="card-content">
+      <text class="card-title">开始定制</text>
+      <text class="card-desc">DIY Your Crystal Bracelet</text>
+      <view class="btn-go">GO ></view>
+    </view>
+    <view class="card-icon" style="background: radial-gradient(circle at 30% 30%, #fff, #aeeeee);"></view>
+  </view>
+
+  <view class="section-title">热门配珠</view>
+  <view class="product-grid">
+    <view class="product-item" wx:for="{{hotBeads}}" wx:key="id">
+      <view class="p-img" style="background: {{item.color}}"></view>
+      <text class="p-name">{{item.name}}</text>
+      <text class="p-price">¥{{item.price}}</text>
+    </view>
+  </view>
+</view>

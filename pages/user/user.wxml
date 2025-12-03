@@ -1,2 +1,20 @@
-<!--pages/user/user.wxml-->
-<text>pages/user/user.wxml</text>
+<view class="container">
+  <view class="user-card">
+    <view class="avatar"></view> <text class="nickname">微信用户</text>
+  </view>
+
+  <view class="menu-list">
+    <view class="menu-item">
+      <text>我的订单</text>
+      <text class="arrow">></text>
+    </view>
+    <view class="menu-item">
+      <text>地址管理</text>
+      <text class="arrow">></text>
+    </view>
+    <button class="menu-item contact-btn" open-type="contact">
+      <text>联系客服</text>
+      <text class="arrow">></text>
+    </button>
+  </view>
+</view>

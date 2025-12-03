@@ -1,66 +1,33 @@
-// pages/cart/cart.js
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    cartList: [],
+    totalMoney: '0.00'
   },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad(options) {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
   onShow() {
-
+    this.loadCart();
   },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
-
+  loadCart() {
+    const list = wx.getStorageSync('my_cart') || [];
+    // 计算总价
+    let sum = 0;
+    list.forEach(item => sum += parseFloat(item.price));
+    this.setData({
+      cartList: list,
+      totalMoney: sum.toFixed(2)
+    });
   },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
-
+  deleteItem(e) {
+    const index = e.currentTarget.dataset.index;
+    const list = this.data.cartList;
+    list.splice(index, 1);
+    wx.setStorageSync('my_cart', list);
+    this.loadCart();
+    wx.showToast({ title: '已删除', icon: 'none' });
   },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
+  goShopping() {
+    wx.switchTab({ url: '/pages/diy/diy' });
   },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
+  onPay() {
+    wx.showToast({ title: '演示模式，暂不支持支付', icon: 'none' });
   }
 })

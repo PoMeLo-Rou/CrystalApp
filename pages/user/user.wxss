@@ -1,1 +1,18 @@
-/* pages/user/user.wxss */
+page { background: #f7f8fa; }
+.container { padding: 30rpx; }
+.user-card {
+  background: #fff; padding: 40rpx;
+  border-radius: 16rpx; display: flex; align-items: center;
+  margin-bottom: 40rpx;
+}
+.avatar { width: 100rpx; height: 100rpx; background: #ddd; border-radius: 50%; margin-right: 20rpx; }
+.nickname { font-size: 32rpx; font-weight: bold; }
+
+.menu-list { background: #fff; border-radius: 16rpx; overflow: hidden; }
+.menu-item {
+  padding: 30rpx; border-bottom: 1px solid #f5f5f5;
+  display: flex; justify-content: space-between; font-size: 28rpx; color: #333;
+}
+.contact-btn { background: #fff; text-align: left; margin: 0; line-height: normal; }
+.contact-btn::after { border: none; }
+.arrow { color: #ccc; }

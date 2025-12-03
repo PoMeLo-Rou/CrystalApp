@@ -1,66 +1,13 @@
-// pages/index/index.js
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    hotBeads: [
+      { id: 1, name: '极光紫晶', price: 5.5, color: '#9b59b6' },
+      { id: 2, name: '马粉', price: 3.0, color: '#ffcdd2' },
+      { id: 3, name: '蓝月光', price: 8.0, color: '#81d4fa' },
+      { id: 4, name: '钛晶', price: 12.0, color: '#ffd700' }
+    ]
   },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad(options) {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide() {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload() {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh() {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom() {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage() {
-
+  goToDIY() {
+    wx.switchTab({ url: '/pages/diy/diy' })
   }
 })

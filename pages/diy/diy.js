@@ -1,3 +1,4 @@
+// pages/diy/diy.js
 Page({
   data: {
     rawBeadList: [
@@ -15,10 +16,7 @@ Page({
     showClearConfirm: false
   },
 
-  // --- 全局参数 ---
-  // [关键] 稍微调大一点间隔，防止视觉上的边缘重叠
   BEAD_GAP_RAD: 0.36, 
-  
   canvasNode: null,
   ctx: null,
   canvasWidth: 0,
@@ -28,7 +26,7 @@ Page({
   
   isDragging: false,
   draggingIndex: -1,
-  originalAngleBeforeDrag: 0, // [新增] 记录拖拽前的角度，用于回弹
+  originalAngleBeforeDrag: 0, 
 
   onLoad() {
     this.setData({ beadList: this.data.rawBeadList });
@@ -46,7 +44,7 @@ Page({
         if (!res[0] || !res[0].node) return;
         const canvas = res[0].node;
         const ctx = canvas.getContext('2d');
-        const dpr = wx.getSystemInfoSync().pixelRatio;
+        const dpr = this.getPixelRatio();
 
         canvas.width = res[0].width * dpr;
         canvas.height = res[0].height * dpr;
@@ -63,17 +61,39 @@ Page({
       });
   },
 
-  // --- 1. 智能添加 ---
+  getPixelRatio() {
+    if (typeof wx.getWindowInfo === 'function') {
+      const info = wx.getWindowInfo();
+      return info && info.pixelRatio ? info.pixelRatio : 1;
+    }
+    const legacyInfo = wx.getSystemInfoSync();
+    return legacyInfo && legacyInfo.pixelRatio ? legacyInfo.pixelRatio : 1;
+  },
+
+  // 1. 智能添加 (修改版：严格顺时针)
   onSelectBead(e) {
     const bead = e.currentTarget.dataset.item;
-    // 默认从正上方(-PI/2)开始找
-    const startAngle = -Math.PI / 2;
     
-    // 使用新的查找算法寻找空位
-    const foundAngle = this.findNearestEmptySlot(startAngle, -1);
+    // 起始点：12点钟方向
+    const startAngle = -Math.PI / 2;
+    let foundAngle = null;
+
+    // [核心修改] 
+    // 不再调用 findNearestEmptySlot (那是给拖拽用的)
+    // 而是写死一个循环：只向右(顺时针)寻找空位
+    for (let i = 0; i < 50; i++) {
+      // 每次向右挪一个间隔
+      const testAngle = startAngle + (i * this.BEAD_GAP_RAD);
+      
+      // 只要这个位置没碰撞，就是它了
+      if (!this.checkCollision(testAngle, -1)) {
+        foundAngle = testAngle;
+        break; 
+      }
+    }
 
     if (foundAngle === null) {
-      wx.showToast({ title: '没有空间啦', icon: 'none' });
+      wx.showToast({ title: '位置满啦', icon: 'none' });
       return;
     }
 
@@ -87,8 +107,7 @@ Page({
     this.updateDataAndRender([...this.data.addedBeads, newBeadObj]);
   },
 
-  // --- 2. [核心工具] 角度归一化 ---
-  // 把任何角度转换到 -PI ~ PI 之间，确保比较时不出错
+  // 2. 角度归一化
   normalizeAngle(angle) {
     let res = angle;
     while (res <= -Math.PI) res += 2 * Math.PI;
@@ -96,7 +115,7 @@ Page({
     return res;
   },
 
-  // --- 3. [核心算法] 严格的碰撞检测 ---
+  // 3. 碰撞检测
   checkCollision(targetAngle, excludeIndex) {
     const beads = this.data.addedBeads;
     const normTarget = this.normalizeAngle(targetAngle);
@@ -105,59 +124,36 @@ Page({
       if (i === excludeIndex) continue;
       
       const normBead = this.normalizeAngle(beads[i].angle);
-      
-      // 计算圆周上的最短距离
       let diff = Math.abs(normTarget - normBead);
       if (diff > Math.PI) diff = 2 * Math.PI - diff;
       
-      // 如果距离小于间隔，判定为碰撞
-      if (diff < this.BEAD_GAP_RAD * 0.95) return true; // 0.95做一点点容错
+      if (diff < this.BEAD_GAP_RAD * 0.9) return true; // 0.9 稍微留点缝隙
     }
     return false;
   },
 
-  // --- 4. [核心算法] 寻找最近的合法空位 ---
-  // 以前是盲目搜索，现在是“候选点评估法”
+  // 4. [升级版] 寻找最近空位 (搜索全圆)
   findNearestEmptySlot(targetAngle, myIndex) {
-    // A. 如果目标位置本身就是空的，直接返回
     if (!this.checkCollision(targetAngle, myIndex)) {
       return targetAngle;
     }
 
-    const beads = this.data.addedBeads;
-    const candidates = []; // 候选位置列表
+    // 每次搜 1 度，搜 180 次（覆盖左右各 180 度 = 全圆）
+    const step = 0.017; 
+    const maxSteps = 180; 
 
-    // B. 收集所有可能的缝隙
-    // 对于每一颗现有的珠子，它的“左边紧贴处”和“右边紧贴处”都是潜在的候选位
-    beads.forEach((b, idx) => {
-      if (idx === myIndex) return;
-      candidates.push(b.angle + this.BEAD_GAP_RAD); // 右邻居
-      candidates.push(b.angle - this.BEAD_GAP_RAD); // 左邻居
-    });
+    for (let i = 1; i <= maxSteps; i++) {
+      const offset = i * step;
+      // 搜右边
+      if (!this.checkCollision(targetAngle + offset, myIndex)) return targetAngle + offset;
+      // 搜左边
+      if (!this.checkCollision(targetAngle - offset, myIndex)) return targetAngle - offset;
+    }
 
-    // C. 筛选出不碰撞的候选位
-    const validCandidates = candidates.filter(ang => !this.checkCollision(ang, myIndex));
-
-    if (validCandidates.length === 0) return null; // 真的没地儿了
-
-    // D. 找出离 targetAngle 最近的那个
-    let bestAngle = null;
-    let minDiff = Infinity;
-
-    validCandidates.forEach(cand => {
-      let diff = Math.abs(this.normalizeAngle(cand) - this.normalizeAngle(targetAngle));
-      if (diff > Math.PI) diff = 2 * Math.PI - diff;
-
-      if (diff < minDiff) {
-        minDiff = diff;
-        bestAngle = cand;
-      }
-    });
-
-    return bestAngle;
+    // 如果全圆都搜遍了还没位置，说明真满了
+    return null; 
   },
 
-  // --- 辅助函数 ---
   updateDataAndRender(newBeads) {
     const total = newBeads.reduce((sum, item) => sum + item.price, 0);
     this.setData({
@@ -168,8 +164,41 @@ Page({
     });
   },
 
-  // --- 触摸交互 ---
+  // --- 保存图片 ---
+  onSaveImage() {
+    if (this.data.addedBeads.length === 0) return;
+    wx.canvasToTempFilePath({
+      canvas: this.canvasNode,
+      success: (res) => {
+        wx.saveImageToPhotosAlbum({
+          filePath: res.tempFilePath,
+          success: () => wx.showToast({ title: '已保存', icon: 'success' })
+        })
+      }
+    })
+  },
 
+  // --- 加入购物车 ---
+  onAddToCart() {
+    if (this.data.addedBeads.length === 0) return;
+
+    const currentDesign = {
+      id: Date.now(), // 订单ID
+      beadCount: this.data.addedBeads.length,
+      price: this.data.totalPrice,
+      previewColor: this.data.addedBeads[0].color, // 取第一颗珠子颜色做展示
+      time: new Date().toLocaleDateString()
+    };
+
+    // 存入本地缓存
+    let cart = wx.getStorageSync('my_cart') || [];
+    cart.unshift(currentDesign); // 加到最前面
+    wx.setStorageSync('my_cart', cart);
+
+    wx.showToast({ title: '已加入购物车', icon: 'success' });
+  },
+
+  // --- 触摸事件 ---
   onTouchStart(e) {
     if (e.touches.length > 1) return;
     const { x, y } = e.touches[0];
@@ -180,10 +209,9 @@ Page({
     for (let i = beads.length - 1; i >= 0; i--) {
       const dx = touchX - beads[i].x;
       const dy = touchY - beads[i].y;
-      if (dx * dx + dy * dy < 30 * 30) {
+      if (dx * dx + dy * dy < 35 * 35) { // 扩大点击判定区域
         this.isDragging = true;
         this.draggingIndex = i;
-        // [新增] 记录起飞前的位置，如果没地儿放就弹回来
         this.originalAngleBeforeDrag = beads[i].angle;
         break;
       }
@@ -197,7 +225,7 @@ Page({
     const touchX = x - this.canvasLeft;
     const touchY = y - this.canvasTop;
 
-    // 垃圾桶逻辑
+    // 垃圾桶检测
     const distToRight = this.canvasWidth - touchX;
     const distToBottom = this.canvasHeight - touchY;
     if (distToRight < 80 && distToBottom < 80) {
@@ -206,7 +234,7 @@ Page({
       if (this.data.isTrashHover) this.setData({ isTrashHover: false });
     }
 
-    // 珠子跟随手指
+    // 跟手逻辑
     const targetBead = this.data.addedBeads[this.draggingIndex];
     targetBead.x = touchX;
     targetBead.y = touchY;
@@ -215,7 +243,7 @@ Page({
   },
 
   onTouchEnd() {
-    // 1. 垃圾桶删除
+    // 1. 删除
     if (this.data.isTrashHover && this.draggingIndex !== -1) {
       const beads = this.data.addedBeads;
       beads.splice(this.draggingIndex, 1);
@@ -227,31 +255,28 @@ Page({
       return;
     }
 
-    // 2. 松手逻辑
+    // 2. 吸附
     if (this.isDragging && this.draggingIndex !== -1) {
       const bead = this.data.addedBeads[this.draggingIndex];
       const centerX = this.canvasWidth / 2;
       const centerY = this.canvasHeight / 2;
 
-      // 算出落点的理想角度
       let dropAngle = Math.atan2(bead.y - centerY, bead.x - centerX);
       
-      // [核心修复] 使用新的找空位算法
+      // 强力找空位
       let bestAngle = this.findNearestEmptySlot(dropAngle, this.draggingIndex);
 
       if (bestAngle !== null) {
-        // 找到了空位，吸附过去
         this.data.addedBeads[this.draggingIndex].angle = bestAngle;
       } else {
-        // 没地儿放（比如手链满了还硬挤），弹回起飞点
+        // 全满了，弹回原位
         this.data.addedBeads[this.draggingIndex].angle = this.originalAngleBeforeDrag;
-        wx.showToast({ title: '这里放不下啦', icon: 'none' });
       }
     }
 
     this.isDragging = false;
     this.draggingIndex = -1;
-    this.render(); // 强制归位
+    this.render();
     this.setData({ addedBeads: this.data.addedBeads });
   },
 
@@ -262,9 +287,7 @@ Page({
       wx.showToast({ title: '已清空', icon: 'none' });
     } else {
       this.setData({ showClearConfirm: true });
-      setTimeout(() => {
-        if (this.data.showClearConfirm) this.setData({ showClearConfirm: false });
-      }, 3000);
+      setTimeout(() => { if (this.data.showClearConfirm) this.setData({ showClearConfirm: false }); }, 3000);
     }
   },
 
@@ -289,7 +312,6 @@ Page({
       let x = bead.x;
       let y = bead.y;
 
-      // 非拖拽状态：强制固定在圆周上
       if (index !== this.draggingIndex) {
         const angle = bead.angle;
         x = centerX + braceletRadius * Math.cos(angle);
